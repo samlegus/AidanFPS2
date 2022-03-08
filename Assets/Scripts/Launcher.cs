@@ -18,8 +18,18 @@ public class Launcher : MonoBehaviourPunCallbacks
 	[SerializeField] GameObject roomListItemPrefab;
 	[SerializeField] GameObject PlayerListItemPrefab;
 	[SerializeField] GameObject startGameButton;
-	[SerializeField] string MapName = "Game";
 	
+	public int mapID = 1;
+	
+	public void SetLevelID(int levelID)
+    {
+		mapID = levelID;
+    }
+
+
+
+
+
 	void Awake()
 	{
 		Instance = this;
@@ -93,7 +103,8 @@ public override void OnMasterClientSwitched(Player newMasterClient)
 	
 	public void StartGame()
 	{
-		PhotonNetwork.LoadLevel(1);
+		PhotonNetwork.LoadLevel(mapID);
+		Cursor.lockState = CursorLockMode.Locked;
 	}
 	
 	public void JoinRoom(RoomInfo info)

@@ -8,31 +8,38 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviourPunCallbacks, IDamagable
 {
+	// UI
 	[SerializeField] Image healthbarImage;
-
 	[SerializeField] GameObject ui;
 
-	[SerializeField] GameObject cameraHolder; 
-	
-	[SerializeField] float mouseSensitivity, sprintSpeed, walkSpeed, jumpForce, smoothTime;
-	
-	[SerializeField] Item[] items;
-	
-	int itemIndex;
-	int previousItemIndex = -1;
-	
+	// Camera
+	[SerializeField] GameObject cameraHolder;
 	float verticalLookRotation;
+
+	// Variables for moving up and down stairs
+	[SerializeField] GameObject stepRayLower;
+	[SerializeField] GameObject stepRayUpper;
+	[SerializeField] float stepHeight = 0.3f;
+	[SerializeField] float stepSmooth = 0.1f;
+	
+	// controls and movement
+	[SerializeField] float mouseSensitivity, sprintSpeed, walkSpeed, jumpForce, smoothTime;
 	bool grounded;
 	Vector3 smoothMoveVelocity;
 	Vector3 moveAmount;
-	
-	Rigidbody rb;
-	
-	PhotonView PV;
-	
+
+	// items and guns
+	[SerializeField] Item[] items;
+	int itemIndex;
+	int previousItemIndex = -1;
+
+	// health
 	const float maxHealh = 100f;
 	float currentHealth = maxHealh;
-	
+
+	// components and classes
+	Rigidbody rb;
+	PhotonView PV;
 	PlayerManager playerManager;
 	
 	void Awake()
@@ -41,6 +48,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamagable
 		PV = GetComponent<PhotonView>();
 		
 		playerManager = PhotonView.Find((int)PV.InstantiationData[0]).GetComponent<PlayerManager>();
+
+		stepRayUpper.transform.position = new Vector3(stepRayUpper.transform.position.x, stepHeight, stepRayUpper.transform.position.z);
 	}
 	
 	void Start()
@@ -65,6 +74,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamagable
 		Look();
 		Move();
 		Jump();
+		stepClimb();
 		
 		for(int i = 0; i < items.Length; i++)
 		{
@@ -180,6 +190,39 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamagable
 	public void TakeDamage(float damage)
 	{
 		PV.RPC("RPC_TakeDamage", RpcTarget.All, damage);
+	}
+
+	void stepClimb()
+    {
+		RaycastHit hitLower;
+		if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitLower, 0.1f))
+        {
+			RaycastHit hitUpper;
+			if (!Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitUpper, 0.1f))
+				{
+					rb.position -= new Vector3(0f, -stepSmooth, 0f);
+				}
+        }
+
+		RaycastHit hitLower45;
+		if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitLower45, 0.1f))
+		{
+			RaycastHit hitUpper45;
+			if (!Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitUpper45, 0.1f))
+			{
+				rb.position -= new Vector3(0f, -stepSmooth, 0f);
+			}
+		}
+
+		RaycastHit hitLowerMinus45;
+		if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitLowerMinus45, 0.1f))
+		{
+			RaycastHit hitUpperMinus45;
+			if (!Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitUpperMinus45, 0.1f))
+			{
+				rb.position -= new Vector3(0f, -stepSmooth, 0f);
+			}
+		}
 	}
 	
 	[PunRPC]
