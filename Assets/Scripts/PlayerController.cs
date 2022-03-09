@@ -179,8 +179,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamagable
 	{
 		grounded = _grounded;
 	}
-	
-	void FixedUpdate()
+
+    
+
+    void FixedUpdate()
 	{
 		if(!PV.IsMine)
 			return;
